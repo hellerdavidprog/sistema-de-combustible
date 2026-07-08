@@ -18,10 +18,18 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const [loading, setLoading] = useState(false)
 
   const isSignUp = mode === 'sign-up'
+  const passwordValid = password.length >= 8
+  const isFormValid = isSignUp ? name && email && passwordValid : email && passwordValid
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!passwordValid) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+
     setLoading(true)
 
     const { error } = isSignUp
@@ -88,6 +96,14 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               minLength={8}
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
             />
+            {isSignUp && password.length > 0 && password.length < 8 && (
+              <p className="text-xs text-muted-foreground">
+                At least {8 - password.length} more character{8 - password.length > 1 ? 's' : ''} required
+              </p>
+            )}
+            {isSignUp && password.length >= 8 && (
+              <p className="text-xs text-green-600">Password is valid</p>
+            )}
           </div>
 
           {error && (
@@ -96,7 +112,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             </p>
           )}
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading || !isFormValid} className="w-full">
             {loading
               ? 'Please wait...'
               : isSignUp
