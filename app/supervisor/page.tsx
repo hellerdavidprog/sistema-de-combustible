@@ -1,49 +1,28 @@
 import { DashboardHeader } from "@/components/admin/dashboard-header"
 import { SupervisorCombinedView } from "@/components/supervisor/supervisor-combined-view"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { fuelReceipts } from "@/lib/db/schema"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
+import { desc } from "drizzle-orm"
 
 export default async function SupervisorPage() {
-  const supabase = await createClient()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
-
-  // Get user profile with role (by email)
-  const { data: profile } = await supabase.from("users").select("*").eq("email", user.email).single()
-
-  if (!profile || !profile.is_active) {
-    redirect("/unauthorized")
-  }
-
-  // Allow supervisors and admins to access
-  if (profile.role !== "supervisor" && profile.role !== "admin") {
-    redirect("/operator")
+  if (!session?.user) {
+    redirect("/sign-in")
   }
 
   // Fetch all receipts for dashboard analytics
-  const { data: receipts } = await supabase
-    .from("fuel_receipts")
-    .select(
-      `
-      *,
-      users (
-        username,
-        first_name,
-        last_name
-      )
-    `,
-    )
-    .order("date", { ascending: false })
+  const receipts = await db
+    .select()
+    .from(fuelReceipts)
+    .orderBy(desc(fuelReceipts.createdAt))
 
   return (
     <div className="flex min-h-screen flex-col">
-      <DashboardHeader username={profile.username || "Supervisor"} role={profile.role} />
+      <DashboardHeader username={session.user.name || "Supervisor"} role="supervisor" />
       <main className="flex-1 p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">
           <div>

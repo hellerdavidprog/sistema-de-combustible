@@ -1,32 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { createClient } from "@/lib/supabase/server"
+import { db } from "@/lib/db"
+import { fuelReceipts } from "@/lib/db/schema"
 import { Plane } from "lucide-react"
+import { eq, desc } from "drizzle-orm"
 
 interface RecentReceiptsProps {
   userId?: string
 }
 
 export async function RecentReceipts({ userId }: RecentReceiptsProps) {
-  const supabase = await createClient()
-
-  let query = supabase
-    .from("fuel_receipts")
-    .select(
-      `
-      *,
-      users!inner (
-        username,
-        first_name,
-        last_name
-      )
-    `,
-    )
-    .order("created_at", { ascending: false })
+  let query = db
+    .select()
+    .from(fuelReceipts)
+    .orderBy(desc(fuelReceipts.createdAt))
     .limit(10)
 
   if (userId) {
-    query = query.eq("user_id", userId)
+    query = query.where(eq(fuelReceipts.userId, userId))
   }
 
   const { data: receipts } = await query

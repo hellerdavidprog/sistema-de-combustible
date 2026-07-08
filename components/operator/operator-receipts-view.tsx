@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Download, Search } from "lucide-react"
 import Image from "next/image"
-import { createBrowserClient } from "@/lib/supabase/client"
 import * as XLSX from "xlsx"
 
 interface Receipt {
@@ -42,8 +41,6 @@ export function OperatorReceiptsView() {
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const [suppliers, setSuppliers] = useState<string[]>([])
-
-  const supabase = createBrowserClient()
 
   useEffect(() => {
     fetchReceipts()

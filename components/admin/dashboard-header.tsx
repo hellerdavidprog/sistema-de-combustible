@@ -5,7 +5,7 @@ import { Users, Receipt, BarChart3, LogOut, LayoutDashboard } from "lucide-react
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { createBrowserClient } from "@/lib/supabase/client"
+import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
 
 interface DashboardHeaderProps {
@@ -18,9 +18,8 @@ export function DashboardHeader({ username = "Admin", role = "admin" }: Dashboar
   const router = useRouter()
 
   const handleLogout = async () => {
-    const supabase = createBrowserClient()
-    await supabase.auth.signOut()
-    router.push("/login")
+    await authClient.signOut()
+    router.push("/")
     router.refresh()
   }
 

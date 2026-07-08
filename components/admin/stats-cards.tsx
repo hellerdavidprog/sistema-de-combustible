@@ -1,26 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Fuel, TrendingUp, Plane, Users } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
+import { db } from "@/lib/db"
+import { fuelReceipts } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 
 interface StatsCardsProps {
   userId?: string
 }
 
 export async function StatsCards({ userId }: StatsCardsProps) {
-  const supabase = await createClient()
-
-  let query = supabase.from("fuel_receipts").select("liters_dispensed, user_id", { count: "exact" })
+  let query = db.select().from(fuelReceipts)
 
   if (userId) {
-    query = query.eq("user_id", userId)
+    query = query.where(eq(fuelReceipts.userId, userId))
   }
 
-  const { data: receipts, count } = await query
+  const receipts = await query
 
   const totalLiters = receipts?.reduce((sum, r) => sum + Number(r.liters_dispensed || 0), 0) || 0
+  const count = receipts?.length || 0
 
   // Count unique users
-  const uniqueUsers = userId ? 1 : new Set(receipts?.map((r) => r.user_id)).size
+  const uniqueUsers = userId ? 1 : new Set(receipts?.map((r) => r.userId)).size
 
   const cards = [
     {

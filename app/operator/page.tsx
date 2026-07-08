@@ -1,34 +1,19 @@
 import { DashboardHeader } from "@/components/admin/dashboard-header"
 import { OperatorReceiptsView } from "@/components/operator/operator-receipts-view"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 export default async function OperatorPage() {
-  const supabase = await createClient()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
-
-  // Get user profile with role (by email since users table is independent of auth.users)
-  const { data: profile } = await supabase.from("users").select("*").eq("email", user.email).single()
-
-  if (!profile || !profile.is_active) {
-    redirect("/unauthorized")
-  }
-
-  // Only operators and supervisors can access this page
-  if (profile.role !== "operator" && profile.role !== "supervisor") {
-    redirect("/unauthorized")
+  if (!session?.user) {
+    redirect("/sign-in")
   }
 
   return (
     <div className="flex min-h-screen flex-col">
-      <DashboardHeader username={profile.username || "Operador"} role={profile.role} />
+      <DashboardHeader username={session.user.name || "Operador"} role="operator" />
       <main className="flex-1 p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">
           <div>
