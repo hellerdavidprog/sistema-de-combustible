@@ -1,0 +1,32 @@
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Aircraft symbol -->
+  <g transform="translate(15, 15)">
+    <!-- Fuselage -->
+    <rect x="8" y="12" width="14" height="6" fill="url(#blueGradient)" rx="2"/>
+    <!-- Left wing -->
+    <polygon points="8,15 2,15 8,17" fill="url(#blueGradient)"/>
+    <!-- Right wing -->
+    <polygon points="22,15 28,15 22,17" fill="url(#blueGradient)"/>
+    <!-- Tail -->
+    <polygon points="22,14 26,12 26,18 22,16" fill="#0284c7"/>
+    <!-- Cockpit -->
+    <circle cx="12" cy="13" r="1.5" fill="#1e40af"/>
+  </g>
+  
+  <!-- Text: Estelar -->
+  <text x="50" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1e40af" letter-spacing="0.5">
+    ESTELAR
+  </text>
+  
+  <!-- Subtext: Fuel Control -->
+  <text x="50" y="42" font-family="Arial, sans-serif" font-size="8" fill="#64748b" letter-spacing="1">
+    FUEL CONTROL
+  </text>
+</svg>
