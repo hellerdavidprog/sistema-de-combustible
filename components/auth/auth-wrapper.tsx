@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createBrowserClient } from "@/lib/supabase/client"
+import { authClient } from "@/lib/auth-client"
 
 interface AuthWrapperProps {
   children: React.ReactNode
@@ -14,17 +14,16 @@ export function AuthWrapper({ children, requiredRole }: AuthWrapperProps) {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const supabase = createBrowserClient()
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check if we have a session
-        const { data: { session } } = await supabase.auth.getSession()
+        // Check if we have a session
+        const { data: session } = await authClient.getSession()
         
         if (!session) {
-          console.log("[v0] No hay sesión activa, redirigiendo a login")
-          router.push("/login")
+          console.log("[v0] No hay sesión activa, redirigiendo a sign-in")
+          router.push("/sign-in")
           return
         }
 

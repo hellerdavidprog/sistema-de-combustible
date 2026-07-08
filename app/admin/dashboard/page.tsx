@@ -1,47 +1,28 @@
 import { DashboardHeader } from "@/components/admin/dashboard-header"
 import { FilteredDashboardContent } from "@/components/admin/filtered-dashboard-content"
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { fuelReceipts } from "@/lib/db/schema"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
+import { desc } from "drizzle-orm"
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
+  if (!session?.user) {
+    redirect("/sign-in")
   }
 
-  // Get user profile with role (by email since users table is independent of auth.users)
-  const { data: profile } = await supabase.from("users").select("*").eq("email", user.email).single()
-
-  if (!profile || !profile.is_active) {
-    redirect("/unauthorized")
-  }
-
-  if (profile.role !== "admin") {
-    redirect("/operator")
-  }
-
-  const { data: receipts } = await supabase
-    .from("fuel_receipts")
-    .select(
-      `
-      *,
-      users (
-        username,
-        first_name,
-        last_name
-      )
-    `,
-    )
-    .order("date", { ascending: false })
+  // Fetch fuel receipts for display
+  const receipts = await db
+    .select()
+    .from(fuelReceipts)
+    .orderBy(desc(fuelReceipts.createdAt))
 
   return (
     <div className="flex min-h-screen flex-col">
-      <DashboardHeader username={profile.username || "Admin"} role={profile.role} />
+      <DashboardHeader username={session.user.name || "Admin"} role="admin" />
       <main className="flex-1 p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-8">
           <div>

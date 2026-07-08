@@ -1,26 +1,12 @@
-import { createClient } from "@/lib/supabase/server"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 export default async function AdminPage() {
-  const supabase = await createClient()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
-
-  // Get user profile with role (by email since users table is independent of auth.users)
-  const { data: profile } = await supabase.from("users").select("*").eq("email", user.email).single()
-
-  if (!profile || !profile.is_active) {
-    redirect("/unauthorized")
-  }
-
-  if (profile.role === "operator") {
-    redirect("/operator")
+  if (!session?.user) {
+    redirect("/sign-in")
   }
 
   // Admin goes to dashboard
